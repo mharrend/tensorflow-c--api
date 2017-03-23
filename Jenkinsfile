@@ -45,10 +45,14 @@ wget https://github.com/bazelbuild/bazel/releases/download/0.4.5/bazel-0.4.5-dis
 unzip bazel-0.4.5-dist.zip 
 chmod +x ./compile.sh
 ./compile.sh
+echo "Finished compiling bazel"
 
-
-
-
+# Compiling Tensorflow
+echo "Start compiling Tensorflow"
+git clone https://github.com/tensorflow/tensorflow
+cd tensorflow
+./configure	
+$JENKINSCMSSWSRCDIR/output/bazel build -c opt //tensorflow:libtensorflow_cc.so
 
 '''
         }
