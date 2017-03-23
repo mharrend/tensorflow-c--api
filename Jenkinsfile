@@ -44,6 +44,7 @@ echo "Start compiling bazel"
 wget https://github.com/bazelbuild/bazel/releases/download/0.4.5/bazel-0.4.5-dist.zip
 unzip bazel-0.4.5-dist.zip 
 chmod +x ./compile.sh
+./compile.sh
 
 
 
