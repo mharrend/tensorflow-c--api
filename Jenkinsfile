@@ -16,8 +16,7 @@ pipeline {
       steps {
         echo 'Start script'
         node(label: 'slc6') {
-
-            sh '''#!/bin/zsh -l
+          sh '''#!/bin/zsh -l
 # Use login shell
 set -o xtrace
 export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch 
@@ -53,8 +52,6 @@ chmod +x ./bazel-0.4.5/compile.sh
 
 
 '''
-          
-          
         }
         
       }
