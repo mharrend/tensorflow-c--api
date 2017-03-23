@@ -15,7 +15,7 @@ pipeline {
     stage('Start script') {
       steps {
         echo 'Start script'
-        node(label: 'naf') {
+        node(label: 'slc6') {
           catchError() {
             sh '''#!/bin/zsh -l
 # Use login shell
