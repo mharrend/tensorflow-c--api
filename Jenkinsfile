@@ -41,10 +41,9 @@ eval `scramv1 runtime -sh`
 # Compiling bazel
 echo "Start compiling bazel"
 
-wget https://github.com/bazelbuild/bazel/archive/0.4.5.tar.gz
-tar xvf 0.4.5.tar.gz
-chmod +x ./bazel-0.4.5/compile.sh
-./bazel-0.4.5/compile.sh
+wget https://github.com/bazelbuild/bazel/releases/download/0.4.5/bazel-0.4.5-dist.zip
+unzip bazel-0.4.5-dist.zip 
+chmod +x ./compile.sh
 
 
 
