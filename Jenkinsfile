@@ -16,7 +16,7 @@ pipeline {
       steps {
         echo 'Start script'
         node(label: 'slc6') {
-          catchError() {
+
             sh '''#!/bin/zsh -l
 # Use login shell
 set -o xtrace
@@ -42,17 +42,18 @@ eval `scramv1 runtime -sh`
 # Compiling bazel
 echo "Start compiling bazel"
 
-wget https://github.com/bazelbuild/bazel/releases/download/0.4.5/bazel-0.4.5-installer-linux-x86_64.sh
-chmod +x bazel-0.4.5-installer-linux-x86_64.sh
-./bazel-0.4.5-installer-linux-x86_64.sh --help
-./bazel-0.4.5-installer-linux-x86_64.sh --user
+wget https://github.com/bazelbuild/bazel/archive/0.4.5.tar.gz
+tar xvf bazel-0.4.5.tar.gz
+chmod +x ./bazel-0.4.5/compile.sh
+./bazel-0.4.5/compile.sh --help
+./bazel-0.4.5/compile.sh
 
 
 
 
 
 '''
-          }
+          
           
         }
         
