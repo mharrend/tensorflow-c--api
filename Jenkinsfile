@@ -38,6 +38,14 @@ scram project $JENKINSCMSSWFOLDER
 cd $JENKINSCMSSWSRCDIR
 eval `scramv1 runtime -sh` 
 
+# Setup c++ library paths and settings
+scram setup gcc-cxxcompiler
+export PATH="/cvmfs/cms.cern.ch/share/overrides/bin:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/bin/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/external/slc6_amd64_gcc530/bin:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/bin/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/llvm/3.8.0-ikhhed/bin:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/bin:/afs/cern.ch/cms/caf/scripts:/cvmfs/cms.cern.ch/common:/cvmfs/cms.cern.ch/bin:/usr/sue/sbin:/usr/sue/bin:/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin":$PATH
+export LD_LIBRARY_PATH=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/biglib/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/lib/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/external/slc6_amd64_gcc530/lib:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/biglib/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/lib/slc6_amd64_gcc530:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/llvm/3.8.0-ikhhed/lib64:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib64:/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib:$LD_LIBRARY_PATH
+export LIBRARY_PATH=$LD_LIBRARY_PATH:$LIBRARY_PATH
+export LDFLAGS="-Wl,-rpath,/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib64 -L /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib64 -Wl,-rpath,/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib -L /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/lib"
+export CXX=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/gcc/5.3.0/bin/g++
+
 # Compiling bazel
 echo "Start compiling bazel"
 
@@ -51,8 +59,20 @@ echo "Finished compiling bazel"
 echo "Start compiling Tensorflow"
 git clone https://github.com/tensorflow/tensorflow
 cd tensorflow
+
+# Make sure Tensorflow configure runs non-interactive by setting variables
+export PYTHON_BIN_PATH=/cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/external/slc6_amd64_gcc530/bin/python
+export TF_NEED_MKL=0
+export CC_OPT_FLAGS="-march=native"
+export TF_NEED_JEMALLOC=0
+export TF_NEED_GCP=0
+export TF_NEED_HDFS=0
+export TF_ENABLE_XLA=0
+export TF_NEED_OPENCL=0
+export TF_NEED_CUDA=0
+
 ./configure	
-$JENKINSCMSSWSRCDIR/output/bazel build -c opt //tensorflow:libtensorflow_cc.so
+$JENKINSCMSSWSRCDIR/output/bazel build -s -c opt //tensorflow:libtensorflow_cc.so
 
 '''
         }
@@ -62,7 +82,7 @@ $JENKINSCMSSWSRCDIR/output/bazel build -c opt //tensorflow:libtensorflow_cc.so
     stage('Deploy') {
       steps {
         echo 'Finishing...'
-        mattermostSend(message: 'Tensorflow-C++-API build start', channel: 'ttHGroup-devel', color: 'green')
+        mattermostSend(message: 'Tensorflow-C++-API build finished', channel: 'ttHGroup-devel', color: 'green')
       }
     }
   }
