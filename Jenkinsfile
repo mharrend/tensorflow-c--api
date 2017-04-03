@@ -33,7 +33,10 @@ export JENKINSCMSSWSRCDIR=$JENKINSCMSSWINSTALLDIR"/src"
 echo $JENKINSCMSSWSRCDIR
 
 
-# create new CMSSW environment
+# create new CMSSW environment and delete old one
+echo "Deleting old CMSSW install dir: " $JENKINSCMSSWINSTALLDIR
+rm -rf $JENKINSCMSSWINSTALLDIR
+echo "Creating new CMSSW install dir"
 scram project $JENKINSCMSSWFOLDER
 cd $JENKINSCMSSWSRCDIR
 eval `scramv1 runtime -sh` 
@@ -71,8 +74,29 @@ export TF_ENABLE_XLA=0
 export TF_NEED_OPENCL=0
 export TF_NEED_CUDA=0
 
+# Configure Tensorflow
+echo "Configure Tensorflow"
 ./configure	
+
+# Patch Protobuf in tensorflow to make sure that non-default gcc installation is used
+echo "Patching protobuf"
+wget https://raw.githubusercontent.com/mharrend/tensorflow-c--api/master/protobuf-patch.bzl
+patch -p1 -i protobuf-patch.bzl
+
+# Compile Tensorflow C++ library
+echo "Compiling Tensorflow C++ library"
 $JENKINSCMSSWSRCDIR/output/bazel build -s -c opt //tensorflow:libtensorflow_cc.so
+cp bazel-bin/tensorflow/libtensorflow_cc.so $JENKINSCMSSWSRCDIR/libtensorflow_cc.so
+
+# Compile Tensorflow PIP package
+echo "Compiling Tensorflow PIP package"
+$JENKINSCMSSWSRCDIR/output/bazel build -s -c opt //tensorflow/tools/pip_package:build_pip_package
+echo "Install PIP dependencies"
+wget https://bootstrap.pypa.io/get-pip.py
+python get-pip.py --user
+echo "Build PIP package"
+bazel-bin/tensorflow/tools/pip_package/build_pip_package $JENKINSCMSSWSRCDIR/tensorflow_pkg
+
 
 '''
         }
@@ -82,7 +106,7 @@ $JENKINSCMSSWSRCDIR/output/bazel build -s -c opt //tensorflow:libtensorflow_cc.s
     stage('Deploy') {
       steps {
         echo 'Finishing...'
-        mattermostSend(message: 'Tensorflow-C++-API build finished', channel: 'ttHGroup-devel', color: 'green')
+        mattermostSend(message: 'Tensorflow-C++-API and PIP package build finished', channel: 'ttHGroup-devel', color: 'green')
       }
     }
   }
